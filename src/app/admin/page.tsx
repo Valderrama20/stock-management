@@ -157,6 +157,8 @@ export default function AdminPage() {
                               src={p.imageUrl}
                               alt={p.name}
                               className="w-full h-full object-cover"
+                              width={100}
+                              height={100}
                             />
                           ) : (
                             <Package className="w-6 h-6 text-gray-400 m-3" />

@@ -19,6 +19,8 @@ export function ProductCard({ product }: ProductCardProps) {
           <Image
             src={product.imageUrl}
             alt={product.name}
+            width={100}
+            height={100}
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-200"
           />
         ) : (

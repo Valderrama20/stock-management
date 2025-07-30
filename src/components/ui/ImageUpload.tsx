@@ -77,6 +77,8 @@ export function ImageUpload({
             <Image
               src={value}
               alt="Imagen del producto"
+              width={100}
+              height={100}
               className="w-full h-full object-cover transform group-hover:scale-105 transition-transform"
             />
           </div>
