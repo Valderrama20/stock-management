@@ -10,6 +10,7 @@ export async function GET() {
     });
     return NextResponse.json({ data: categories });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Error fetching categories" },
       { status: 500 }
@@ -22,8 +23,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = CategorySchema.parse(body);
     const category = await prisma.category.create({ data });
-    console.log("Creado con exito: ", category)
+    console.log("Creado con exito: ", category);
     return NextResponse.json({ data: category }, { status: 201 });
+    // @typescript-eslint/no-explicit-any
   } catch (err: any) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.message }, { status: 400 });

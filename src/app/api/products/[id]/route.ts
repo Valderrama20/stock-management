@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ProductSchema } from "@/lib/validations";
-import { deleteImage } from "@/lib/cloudinary"; 
+import { deleteImage } from "@/lib/cloudinary";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // nota el Promise
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const validatedData = ProductSchema.parse(body);
 
     const product = await prisma.product.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
       include: {
         category: true,
@@ -33,12 +34,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // MODIFICADO: Obtener el producto antes de eliminarlo para eliminar la imagen
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!product) {
@@ -55,11 +57,12 @@ export async function DELETE(
 
     // Eliminar producto de la base de datos
     await prisma.product.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Producto eliminado" });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Error al eliminar producto" },
       { status: 500 }
