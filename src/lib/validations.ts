@@ -23,5 +23,8 @@ export const CategorySchema = z.object({
     .max(50, "El slug es muy largo"),
 });
 
+
+
+export type FormData = z.infer<typeof CategorySchema>;
 export type ProductInput = z.infer<typeof ProductSchema>;
 export type CategoryInput = z.infer<typeof CategorySchema>;

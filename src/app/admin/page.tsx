@@ -10,12 +10,15 @@ import { ProductForm } from "@/components/product/ProductForm";
 import { Modal } from "@/components/ui/Modal";
 import { Edit, Package, Plus, Trash2 } from "lucide-react";
 import { formatStock } from "@/lib/utils"; // IMPORT FALTANTE
+import { CategoryForm } from "@/components/category/CategoryForm";
 
 export default function AdminPage() {
   // CAMBIÉ HomePage por AdminPage
   const [products, setProducts] = useState<ProductWithCategory[]>([]);
   // ELIMINÉ filters y showFilters ya que no se usan en el admin
   const [loading, setLoading] = useState(true);
+
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
 
   // ESTADOS FALTANTES PARA LOS MODALES
   const [showForm, setShowForm] = useState(false);
@@ -64,6 +67,11 @@ export default function AdminPage() {
     }
   };
 
+  const handleCategorySuccess = () => {
+    setShowCategoryForm(false);
+    // si tienes un fetchCategories de categorías, llámalo aquí para actualizar el select
+  };
+
   // FUNCIÓN FALTANTE PARA MANEJAR EL ÉXITO DEL FORMULARIO
   const handleFormSuccess = () => {
     setShowForm(false);
@@ -86,6 +94,10 @@ export default function AdminPage() {
               <Button onClick={() => setShowForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Producto
+              </Button>
+              <Button onClick={() => setShowCategoryForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nueva Categoría
               </Button>
               <Link
                 href="/"
@@ -294,6 +306,13 @@ export default function AdminPage() {
         {editingProduct && (
           <ProductForm product={editingProduct} onSuccess={handleFormSuccess} />
         )}
+      </Modal>
+      <Modal
+        isOpen={showCategoryForm}
+        onClose={() => setShowCategoryForm(false)}
+        title="Crear Categoría"
+      >
+        <CategoryForm onSuccess={handleCategorySuccess} />
       </Modal>
     </div>
   );
