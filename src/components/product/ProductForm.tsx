@@ -9,7 +9,8 @@ import { Select } from "@/components/ui/Select";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { ProductSchema, ProductInput } from "@/lib/validations";
 import { ProductWithCategory } from "@/lib/types";
-import { Category } from "@/generated/prisma";
+import { Category } from "@prisma/client";
+
 interface ProductFormProps {
   product?: ProductWithCategory;
   onSuccess: () => void;
@@ -49,49 +50,29 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
   const imageUrl = watch("imageUrl");
 
   useEffect(() => {
-    fetchCategories();
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((json) => json.data && setCategories(json.data))
+      .catch((err) => console.error("Error fetching categories:", err));
   }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/categories");
-      const result = await response.json();
-      if (result.data) {
-        setCategories(result.data);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
 
   const onSubmit = async (data: ProductInput) => {
     setLoading(true);
     setError(null);
-
     try {
       const url = product ? `/api/products/${product.id}` : "/api/products";
       const method = product ? "PUT" : "POST";
-
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Error al guardar el producto");
-      }
-
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Error saving product");
       onSuccess();
-      if (!product) {
-        reset();
-      }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Error desconocido");
+      if (!product) reset();
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -100,12 +81,11 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-3">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3">
+          {error}
         </div>
       )}
 
-      {/* NUEVA SECCIÓN DE IMAGEN */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Imagen del producto
@@ -117,17 +97,21 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
           disabled={loading}
         />
         {errors.imageUrl && (
-          <p className="text-sm text-red-600 mt-1">{errors.imageUrl.message}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.imageUrl.message}</p>
         )}
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Nombre del producto *
+          Nombre *
         </label>
-        <Input {...register("name")} placeholder="Ej: Laptop Dell XPS 13" />
+        <Input
+          {...register("name")}
+          placeholder="Ej: Laptop Dell XPS 13"
+          className="w-full"
+        />
         {errors.name && (
-          <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
         )}
       </div>
 
@@ -138,24 +122,24 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         <textarea
           {...register("description")}
           placeholder="Descripción del producto..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm hover:shadow transition-shadow resize-none"
           rows={3}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Stock *
           </label>
           <Input
             type="number"
-            min="0"
+            min={0}
             {...register("stock", { valueAsNumber: true })}
-            placeholder="0"
+            className="w-full"
           />
           {errors.stock && (
-            <p className="text-sm text-red-600 mt-1">{errors.stock.message}</p>
+            <p className="mt-1 text-sm text-red-600">{errors.stock.message}</p>
           )}
         </div>
 
@@ -163,25 +147,30 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Categoría *
           </label>
-          <Select {...register("categoryId")}>
+          <Select {...register("categoryId")} className="w-full">
             <option value="">Seleccionar categoría</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
               </option>
             ))}
           </Select>
           {errors.categoryId && (
-            <p className="text-sm text-red-600 mt-1">
+            <p className="mt-1 text-sm text-red-600">
               {errors.categoryId.message}
             </p>
           )}
         </div>
       </div>
 
-      <div className="flex justify-end space-x-3 pt-4">
-        <Button type="submit" disabled={loading} className="px-6">
-          {loading ? "Guardando..." : product ? "Actualizar" : "Crear Producto"}
+      <div className="flex justify-end">
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full sm:w-auto"
+          disabled={loading}
+        >
+          {loading ? "Guardando..." : product ? "Actualizar" : "Crear"}
         </Button>
       </div>
     </form>

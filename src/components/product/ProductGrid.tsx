@@ -1,3 +1,4 @@
+import { Package } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import { ProductWithCategory } from "@/lib/types";
 
@@ -13,12 +14,11 @@ export function ProductGrid({ products, loading }: ProductGridProps) {
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="bg-white rounded-lg shadow-sm border animate-pulse"
+            className="bg-white rounded-xl shadow animate-pulse overflow-hidden"
           >
             <div className="aspect-square bg-gray-200" />
             <div className="p-4 space-y-2">
-              <div className="h-4 bg-gray-200 rounded" />
-              <div className="h-3 bg-gray-200 rounded w-2/3" />
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
               <div className="h-3 bg-gray-200 rounded w-1/2" />
             </div>
           </div>
@@ -29,10 +29,13 @@ export function ProductGrid({ products, loading }: ProductGridProps) {
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-500 text-lg">No se encontraron productos</div>
-        <p className="text-gray-400 mt-2">
-          Intenta ajustar los filtros de búsqueda
+      <div className="flex flex-col items-center justify-center py-16 space-y-4">
+        <Package className="h-12 w-12 text-gray-300" />
+        <h2 className="text-lg font-semibold text-gray-600">
+          No hay productos
+        </h2>
+        <p className="text-sm text-gray-500">
+          Ajusta los filtros o crea nuevos productos.
         </p>
       </div>
     );

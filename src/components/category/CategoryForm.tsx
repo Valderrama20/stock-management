@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { CategorySchema, FormData } from "@/lib/validations";
+import { CategorySchema } from "@/lib/validations";
 
 interface CategoryFormProps {
   onSuccess: () => void;
@@ -33,21 +33,18 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
       .replace(/(^-|-$)/g, "");
 
   const onSubmit = async () => {
-    const data = getValues();
-    console.log("submit");
     setLoading(true);
     setError(null);
+    const { name } = getValues();
     try {
-      const slug = generateSlug(data.name);
-      console.log("antes de hacer la peticion");
+      const slug = generateSlug(name);
       const res = await fetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: data.name, slug }),
+        body: JSON.stringify({ name, slug }),
       });
-      console.log("despues de hacer la peticion", res);
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Error");
+      if (!res.ok) throw new Error(result.error || "Error al crear categoría");
       onSuccess();
     } catch (err: any) {
       setError(err.message);
@@ -57,17 +54,30 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {error && <p className="text-red-600">{error}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3">
+          {error}
+        </div>
+      )}
+
       <div>
-        <label className="block text-sm">Nombre *</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Nombre de la categoría *
+        </label>
         <Input {...register("name")} placeholder="Ej: Electrónica" />
         {errors.name && (
-          <p className="text-red-600 text-sm">{errors.name.message}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
         )}
       </div>
+
       <div className="flex justify-end">
-        <Button type="submit" disabled={loading}>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full sm:w-auto"
+          disabled={loading}
+        >
           {loading ? "Guardando..." : "Crear Categoría"}
         </Button>
       </div>

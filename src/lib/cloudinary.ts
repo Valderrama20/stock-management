@@ -37,6 +37,7 @@ export async function uploadImage(file: File): Promise<string> {
         .end(buffer);
     });
   } catch (error) {
+    console.error(error);
     throw new Error("Error al subir imagen a Cloudinary");
   }
 }

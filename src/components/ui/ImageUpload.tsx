@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
-import { Button } from "./Button";
+import { Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface ImageUploadProps {
   value?: string;
@@ -30,13 +30,10 @@ export function ImageUpload({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validar tipo de archivo
     if (!file.type.startsWith("image/")) {
-      setError("Por favor selecciona una imagen válida");
+      setError("Selecciona una imagen válida");
       return;
     }
-
-    // Validar tamaño (5MB máximo)
     if (file.size > 5 * 1024 * 1024) {
       setError("La imagen debe ser menor a 5MB");
       return;
@@ -55,22 +52,15 @@ export function ImageUpload({
       });
 
       const result = await response.json();
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(result.error || "Error al subir imagen");
-      }
 
       onChange(result.url);
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Error al subir imagen"
-      );
+    } catch (err: any) {
+      setError(err?.message);
     } finally {
       setUploading(false);
-      // Limpiar el input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -83,65 +73,61 @@ export function ImageUpload({
     <div className={cn("space-y-2", className)}>
       {value ? (
         <div className="relative group">
-          <div className="aspect-square w-full max-w-xs mx-auto overflow-hidden rounded-lg border-2 border-dashed border-gray-300">
-            <img
+          <div className="aspect-square w-full max-w-sm mx-auto overflow-hidden rounded-lg border-2 border-gray-200">
+            <Image
               src={value}
               alt="Imagen del producto"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transform group-hover:scale-105 transition-transform"
             />
           </div>
-          <Button
+          <button
             type="button"
-            variant="destructive"
-            size="sm"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={handleRemove}
             disabled={disabled}
+            className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition-opacity opacity-0 group-hover:opacity-100"
           >
-            <X className="h-4 w-4" />
-          </Button>
+            <X className="h-5 w-5 text-gray-600" />
+          </button>
         </div>
       ) : (
-        <div className="aspect-square w-full max-w-xs mx-auto">
+        <div className="aspect-square w-full max-w-sm mx-auto">
           <label
             htmlFor="image-upload"
             className={cn(
-              "flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors",
-              disabled && "cursor-not-allowed opacity-50",
+              "flex flex-col items-center justify-center h-full border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition",
+              disabled && "opacity-50 cursor-not-allowed",
               uploading && "cursor-wait"
             )}
           >
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+            <div className="flex flex-col items-center">
               {uploading ? (
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-600" />
               ) : (
-                <ImageIcon className="w-8 h-8 mb-4 text-gray-500" />
+                <Upload className="w-8 h-8 mb-2 text-gray-500" />
               )}
-              <p className="mb-2 text-sm text-gray-500">
-                <span className="font-semibold">
-                  {uploading ? "Subiendo..." : "Click para subir"}
-                </span>
-              </p>
-              <p className="text-xs text-gray-500">
-                PNG, JPG o WEBP (MAX. 5MB)
-              </p>
+              <span className="text-sm font-medium text-gray-700">
+                {uploading ? "Subiendo..." : "Sube tu imagen"}
+              </span>
+              <span className="text-xs text-gray-500 mt-1">
+                PNG, JPG o WEBP (max 5MB)
+              </span>
             </div>
             <input
               id="image-upload"
               ref={fileInputRef}
               type="file"
-              className="hidden"
               accept="image/*"
               onChange={handleFileSelect}
               disabled={disabled || uploading}
+              className="hidden"
             />
           </label>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-3">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded p-2 text-sm">
+          {error}
         </div>
       )}
     </div>

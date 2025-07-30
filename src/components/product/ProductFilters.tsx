@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
-import { Card, CardContent } from "@/components/ui/Card";
+import { cn } from "@/lib/utils";
 import { SearchFilters } from "@/lib/types";
 import { Category } from "@prisma/client";
-
 
 interface ProductFiltersProps {
   filters: SearchFilters;
@@ -23,79 +20,74 @@ export function ProductFilters({
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    fetchCategories();
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((json) => json.data && setCategories(json.data))
+      .catch((err) => console.error("Error fetching categories:", err));
   }, []);
 
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/categories");
-      const result = await response.json();
-      if (result.data) {
-        setCategories(result.data);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
-  const clearFilters = () => {
-    onFiltersChange({});
-  };
-
-  const hasActiveFilters = filters.categoryId || filters.inStock;
+  const clearFilters = () => onFiltersChange({});
+  const hasActive = Boolean(filters.categoryId || filters.inStock);
 
   return (
-    <Card className={className}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-medium text-gray-900">Filtros</h3>
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
-              <X className="h-4 w-4 mr-1" />
-              Limpiar
-            </Button>
-          )}
+    <div
+      className={cn("bg-white rounded-xl shadow-sm p-6 space-y-6", className)}
+    >
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
+        {hasActive && (
+          <button
+            onClick={clearFilters}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+          >
+            Limpiar
+          </button>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        {/* Filtro de Categoría */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Categoría
+          </label>
+          <Select
+            value={filters.categoryId || ""}
+            onChange={(e) =>
+              onFiltersChange({
+                ...filters,
+                categoryId: e.target.value || undefined,
+              })
+            }
+          >
+            <option value="">Todas</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </Select>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Categoría
-            </label>
-            <Select
-              value={filters.categoryId || ""}
-              onChange={(value) =>
-                onFiltersChange({ ...filters, categoryId: value.target.value || undefined })
-              }
-            >
-              <option value="">Todas las categorías</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Disponibilidad
-            </label>
-            <Select
-              value={filters.inStock ? "true" : ""}
-              onChange={(value) =>
-                onFiltersChange({
-                  ...filters,
-                  inStock: value.target.value === "true" || undefined,
-                })
-              }
-            >
-              <option value="">Todos los productos</option>
-              <option value="true">Solo con stock</option>
-            </Select>
-          </div>
+        {/* Filtro de Stock */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Disponibilidad
+          </label>
+          <Select
+            value={filters.inStock ? "true" : ""}
+            onChange={(e) =>
+              onFiltersChange({
+                ...filters,
+                inStock: e.target.value === "true" ? true : undefined,
+              })
+            }
+          >
+            <option value="">Todos</option>
+            <option value="true">Con stock</option>
+          </Select>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
