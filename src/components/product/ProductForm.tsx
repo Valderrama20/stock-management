@@ -47,6 +47,12 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         },
   });
 
+  useEffect(() => {
+    if (product?.categoryId) {
+      setValue("categoryId", product.categoryId);
+    }
+  }, [product, setValue]);
+
   const imageUrl = watch("imageUrl");
 
   useEffect(() => {
@@ -147,7 +153,11 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Categoría *
           </label>
-          <Select {...register("categoryId")} className="w-full">
+          <Select
+            value={watch("categoryId")}
+            onChange={(e) => setValue("categoryId", e.target.value)}
+            className="w-full"
+          >
             <option value="">Seleccionar categoría</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
