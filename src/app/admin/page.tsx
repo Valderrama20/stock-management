@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { Plus, Edit, Trash2, Package, House } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
