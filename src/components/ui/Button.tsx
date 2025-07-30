@@ -19,7 +19,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const base =
-      "inline-flex items-center justify-center font-medium rounded-full transition-shadow focus:outline-none focus:ring-2 focus:ring-offset-2";
+      "inline-flex items-center justify-center font-medium rounded-full transition-shadow focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer";
     const variants = {
       default: "bg-white text-gray-800 shadow-sm hover:shadow-md",
       secondary: "bg-blue-50 text-blue-600 hover:bg-blue-100",

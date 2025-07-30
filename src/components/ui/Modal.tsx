@@ -29,7 +29,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       />
 
       {/* Modal Container */}
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto overflow-hidden">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto overflow-hidden transform transition-all duration-300 ease-out scale-95 opacity-0 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
@@ -42,7 +42,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         </div>
 
         {/* Body */}
-        <div className="p-6 bg-white max-h-[70vh] overflow-y-auto">{children}</div>
+        <div className="p-6 bg-white max-h-[70vh] overflow-y-auto">
+          {children}
+        </div>
 
         {/* Footer (optional actions) */}
         {/* <div className="flex justify-end px-6 py-4 border-t border-gray-200 bg-white">
