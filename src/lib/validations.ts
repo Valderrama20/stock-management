@@ -8,11 +8,8 @@ export const ProductSchema = z.object({
   description: z.string().optional(),
   stock: z.number().min(0, "El stock no puede ser negativo"),
   categoryId: z.string().min(1, "La categoría es requerida"),
-  imageUrl: z
-    .string()
-    .url("URL de imagen inválida")
-    .optional()
-    .or(z.literal("")),
+  // MODIFICADO: Hacer imageUrl opcional sin validación de URL estricta
+  imageUrl: z.string().optional().or(z.literal("")),
 });
 
 export const CategorySchema = z.object({
