@@ -14,6 +14,7 @@ import { CategoryForm } from "@/components/category/CategoryForm";
 import { ProductWithCategory } from "@/lib/types";
 import { formatStock } from "@/lib/utils";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
   const [products, setProducts] = useState<ProductWithCategory[]>([]);
@@ -22,6 +23,9 @@ export default function AdminPage() {
   const [editingProduct, setEditingProduct] =
     useState<ProductWithCategory | null>(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     fetchProducts();
@@ -57,6 +61,8 @@ export default function AdminPage() {
     // optionally reload categories
   };
 
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
   const total = products.length;
   const inStock = products.filter((p) => p.stock > 0).length;
   const outStock = total - inStock;
@@ -67,7 +73,9 @@ export default function AdminPage() {
       <header className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
           <h1 className="text-2xl font-bold text-gray-900">Panel Admin</h1>
-          <div className="flex items-center space-x-3">
+
+          {/* Botones desktop */}
+          <div className="hidden md:flex items-center space-x-3">
             <Button
               variant="secondary"
               onClick={() => setShowCategoryModal(true)}
@@ -77,16 +85,83 @@ export default function AdminPage() {
             <Button variant="default" onClick={() => setShowProductModal(true)}>
               <Plus className="w-4 h-4 mr-1" /> Producto
             </Button>
-            <Link
-              href="/"
-              className="text-md text-blue-600  flex text-center space-x-2 "
+            <Button
+              onClick={() => {
+                router.push("/");
+              }}
+              className="text-blue-600 "
             >
-              <House />
-              <span>Inicio</span>
-            </Link>
+              <House className="w-4 h-4  mr-1" />
+              Inicio
+            </Button>
           </div>
+
+          {/* Hamburguesa móvil */}
+          <button
+            onClick={toggleSidebar}
+            className="md:hidden p-2 rounded hover:bg-gray-100 focus:outline-none"
+          >
+            <svg
+              className="w-6 h-6 text-gray-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
         </div>
       </header>
+
+      {isSidebarOpen && (
+        <div
+          className="fixed left-0 top-0 h-full w-full bg-black/50 shadow-lg p-6 z-50 transform transition-all duration-300 ease-out scale-100 opacity-0 animate-fade-in"
+          onClick={toggleSidebar}
+        >
+          <div
+            className="fixed left-0 top-0 w-64 h-full bg-white shadow-lg p-6 z-50"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-semibold mb-4">Menú</h2>
+            <div className="flex flex-col space-y-3">
+              <Button
+                variant="default"
+                onClick={() => {
+                  setShowProductModal(true);
+                  toggleSidebar();
+                }}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Producto
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowCategoryModal(true);
+                  toggleSidebar();
+                }}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Categoría
+              </Button>
+
+              <Button
+                onClick={() => {
+                  toggleSidebar();
+                  router.push("/");
+                }}
+                className="text-blue-600 "
+              >
+                <House className="w-4 h-4  mr-1" />
+                Inicio
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* STATS */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 px-6 pt-6">
