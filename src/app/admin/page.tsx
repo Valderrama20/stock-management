@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Package, House } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Package,
+  House,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -168,23 +176,55 @@ export default function AdminPage() {
       )}
 
       {/* STATS */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 px-6 pt-6">
-        {[
-          { label: "Total", value: total, color: "blue" },
-          { label: "En Stock", value: inStock, color: "green" },
-          { label: "Sin Stock", value: outStock, color: "red" },
-        ].map((stat) => (
-          <Card key={stat.label} className="rounded-xl">
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <p className="text-sm text-gray-600">{stat.label}</p>
-                <p className="text-xl font-semibold text-gray-900">
-                  {stat.value}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="max-w-7xl mx-auto pt-6 px-4 sm:px-6">
+        <div className="flex gap-2 sm:grid sm:grid-cols-3 sm:gap-4">
+          {[
+            {
+              label: "Total",
+              value: total,
+              color: "blue",
+              icon: <Package className="w-5 h-5 sm:w-6 sm:h-6" />,
+              bg: "bg-blue-50",
+              border: "border-blue-100",
+              text: "text-blue-600",
+            },
+            {
+              label: "En Stock",
+              value: inStock,
+              color: "green",
+              icon: <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />,
+              bg: "bg-green-50",
+              border: "border-green-100",
+              text: "text-green-600",
+            },
+            {
+              label: "Sin Stock",
+              value: outStock,
+              color: "red",
+              icon: <XCircle className="w-5 h-5 sm:w-6 sm:h-6" />,
+              bg: "bg-red-50",
+              border: "border-red-100",
+              text: "text-red-600",
+            },
+          ].map((stat) => (
+            <Card
+              key={stat.label}
+              className={`flex-1 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 ${stat.bg} ${stat.border} border`}
+            >
+              <CardContent className="flex items-center justify-between gap-2 py-3 px-4 sm:py-5 sm:px-6">
+                <div className="flex flex-col">
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">
+                    {stat.label}
+                  </p>
+                  <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                    {stat.value}
+                  </p>
+                </div>
+                <div className={`${stat.text} flex-shrink-0`}>{stat.icon}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
       {/* PRODUCTS TABLE */}
