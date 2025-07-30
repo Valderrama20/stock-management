@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Edit, Trash2, Package } from "lucide-react";
+import { Plus, Edit, Trash2, Package, House } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -66,24 +66,23 @@ export default function AdminPage() {
       {/* HEADER */}
       <header className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Panel Admin</h1>
           <div className="flex items-center space-x-3">
             <Button
               variant="secondary"
-              size="sm"
               onClick={() => setShowCategoryModal(true)}
             >
               <Plus className="w-4 h-4 mr-1" /> Categoría
             </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => setShowProductModal(true)}
-            >
+            <Button variant="default" onClick={() => setShowProductModal(true)}>
               <Plus className="w-4 h-4 mr-1" /> Producto
             </Button>
-            <Link href="/" className="text-sm text-blue-600 hover:underline">
-              Ver tienda
+            <Link
+              href="/"
+              className="text-md text-blue-600  flex text-center space-x-2 "
+            >
+              <House />
+              <span>Inicio</span>
             </Link>
           </div>
         </div>
