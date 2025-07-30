@@ -86,7 +86,7 @@ export function ImageUpload({
             type="button"
             onClick={handleRemove}
             disabled={disabled}
-            className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition-opacity opacity-0 group-hover:opacity-100"
+            className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition-opacity opacity-0 group-hover:opacity-100 cursor-pointer"
           >
             <X className="h-5 w-5 text-gray-600" />
           </button>

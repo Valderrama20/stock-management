@@ -55,6 +55,11 @@ export default function AdminPage() {
     fetchProducts();
   };
 
+  const handleOpenEditProduct  = (product: ProductWithCategory) => {
+    setEditingProduct(product);
+    setShowProductModal(true);
+  };
+
   const closeCategoryModal = () => {
     setShowCategoryModal(false);
     // optionally reload categories
@@ -259,7 +264,7 @@ export default function AdminPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setEditingProduct(p)}
+                          onClick={() => handleOpenEditProduct(p)}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
