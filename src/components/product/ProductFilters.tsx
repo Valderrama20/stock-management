@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { Card, CardContent } from "@/components/ui/Card";
 import { SearchFilters } from "@/lib/types";
-import { Category } from "@/generated/prisma";
+import { Category } from "@prisma/client";
+
 
 interface ProductFiltersProps {
   filters: SearchFilters;

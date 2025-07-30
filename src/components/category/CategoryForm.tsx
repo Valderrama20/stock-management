@@ -19,8 +19,9 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(CategorySchema),
+    getValues,
+  } = useForm<{ name: string }>({
+    resolver: zodResolver(CategorySchema.pick({ name: true })),
     defaultValues: { name: "" },
   });
 
@@ -31,16 +32,20 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async () => {
+    const data = getValues();
+    console.log("submit");
     setLoading(true);
     setError(null);
     try {
       const slug = generateSlug(data.name);
+      console.log("antes de hacer la peticion");
       const res = await fetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: data.name, slug }),
       });
+      console.log("despues de hacer la peticion", res);
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Error");
       onSuccess();
