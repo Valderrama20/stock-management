@@ -19,7 +19,7 @@ export default function AdminPage() {
   const router = useRouter();
 
   // Products state and actions
-  const { products, loading, filters, setFilters, refresh } = useProducts();
+  const { products, loading, filters, setFilters, deleteProduct, refresh } = useProducts();
 
   // Search suggestions
   const {
@@ -86,7 +86,7 @@ export default function AdminPage() {
             products={products}
             loading={loading}
             onEdit={openProductModal}
-            onDelete={refresh}
+            onDelete={deleteProduct}
           />
         </div>
       </main>
