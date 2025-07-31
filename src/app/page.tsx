@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 export default function HomePage() {
   const [products, setProducts] = useState<ProductWithCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<SearchFilters>({});
+  const [filters, setFilters] = useState<SearchFilters>({});    
   const [showCategoryForm, setShowCategoryForm] = useState(false);
 
   // Para búsqueda y sugerencias
