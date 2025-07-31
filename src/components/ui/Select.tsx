@@ -9,7 +9,7 @@ const Select = React.forwardRef<
     <select
       ref={ref}
       className={cn(
-        "w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm hover:shadow transition-shadow",
+        "w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm hover:shadow transition-shadow cursor-pointer",
         className
       )}
       {...props}

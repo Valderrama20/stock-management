@@ -1,367 +1,101 @@
+// src/app/admin/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Package,
-  House,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
-
-import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Modal } from "@/components/ui/Modal";
-
-import { ProductForm } from "@/components/product/ProductForm";
-import { CategoryForm } from "@/components/category/CategoryForm";
-import { ProductWithCategory } from "@/lib/types";
-import { formatStock } from "@/lib/utils";
-import Image from "next/image";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AdminPage() {
-  const [products, setProducts] = useState<ProductWithCategory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showProductModal, setShowProductModal] = useState(false);
-  const [editingProduct, setEditingProduct] =
-    useState<ProductWithCategory | null>(null);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+import { Header } from "@/components/admin/Header";
+import { Sidebar } from "@/components/admin/Sidebar";
+import { Stats } from "@/components/admin/Stats";
+import { SearchPanel } from "@/components/admin/SearchPanel";
+import { ProductsTable } from "@/components/admin/ProductsTable";
+import { ProductModal } from "@/components/admin/ProductModal";
+import { CategoryModal } from "@/components/admin/CategoryModal";
 
+import { useProducts } from "@/hooks/useProducts";
+import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
+
+export default function AdminPage() {
   const router = useRouter();
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  // Products state and actions
+  const { products, loading, filters, setFilters, refresh } = useProducts();
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/products");
-      const json = await res.json();
-      setProducts(json.data || []);
-    } catch {
-      // handle error
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Search suggestions
+  const {
+    query,
+    suggestions,
+    loading: loadingSuggestions,
+    showDropdown,
+    onQueryChange,
+    selectSuggestion,
+  } = useSearchSuggestions(setFilters);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar este producto?")) return;
-    await fetch(`/api/products/${id}`, { method: "DELETE" });
-    setProducts(products.filter((p) => p.id !== id));
-  };
+  // UI state
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<null | any>(null);
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
-  const closeProductModal = () => {
-    setShowProductModal(false);
-    setEditingProduct(null);
-    fetchProducts();
-  };
-
-  const handleOpenEditProduct = (product: ProductWithCategory) => {
+  const openProductModal = (product: any = null) => {
     setEditingProduct(product);
     setShowProductModal(true);
   };
-
-  const closeCategoryModal = () => {
-    setShowCategoryModal(false);
-    // optionally reload categories
+  const closeProductModal = () => {
+    setShowProductModal(false);
+    setEditingProduct(null);
+    refresh();
   };
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-
-  const total = products.length;
-  const inStock = products.filter((p) => p.stock > 0).length;
-  const outStock = total - inStock;
+  const openCategoryModal = () => setShowCategoryModal(true);
+  const closeCategoryModal = () => setShowCategoryModal(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* HEADER */}
-      <header className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Panel Admin</h1>
+      <Header
+        onAddProduct={() => openProductModal()}
+        onAddCategory={openCategoryModal}
+        onHome={() => router.push("/")}
+        onToggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
+      />
 
-          {/* Botones desktop */}
-          <div className="hidden md:flex items-center space-x-3">
-            <Button
-              variant="secondary"
-              onClick={() => setShowCategoryModal(true)}
-            >
-              <Plus className="w-4 h-4 mr-1" /> Categoría
-            </Button>
-            <Button variant="default" onClick={() => setShowProductModal(true)}>
-              <Plus className="w-4 h-4 mr-1" /> Producto
-            </Button>
-            <Button
-              onClick={() => {
-                router.push("/");
-              }}
-              className="text-blue-600 "
-            >
-              <House className="w-4 h-4  mr-1" />
-              Inicio
-            </Button>
-          </div>
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onAddProduct={() => openProductModal()}
+        onAddCategory={openCategoryModal}
+        onHome={() => router.push("/")}
+      />
 
-          {/* Hamburguesa móvil */}
-          <button
-            onClick={toggleSidebar}
-            className="md:hidden p-2 rounded hover:bg-gray-100 focus:outline-none"
-          >
-            <svg
-              className="w-6 h-6 text-gray-700"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
+      <main className="max-w-7xl mx-auto px-6 py-6">
+        <Stats products={products} loading={loading} />
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          <SearchPanel
+            query={query}
+            suggestions={suggestions}
+            loading={loadingSuggestions}
+            showDropdown={showDropdown}
+            onQueryChange={onQueryChange}
+            onSelect={selectSuggestion}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
+
+          <ProductsTable
+            products={products}
+            loading={loading}
+            onEdit={openProductModal}
+            onDelete={refresh}
+          />
         </div>
-      </header>
+      </main>
 
-      {isSidebarOpen && (
-        <div
-          className="fixed left-0 top-0 h-full w-full bg-black/50 shadow-lg p-6 z-50 transform transition-all duration-300 ease-out scale-100 opacity-0 animate-fade-in"
-          onClick={toggleSidebar}
-        >
-          <div
-            className="fixed left-0 top-0 w-64 h-full bg-white shadow-lg p-6 z-50"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl font-semibold mb-4">Menú</h2>
-            <div className="flex flex-col space-y-3">
-              <Button
-                variant="default"
-                onClick={() => {
-                  setShowProductModal(true);
-                  toggleSidebar();
-                }}
-              >
-                <Plus className="w-4 h-4 mr-1" /> Producto
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setShowCategoryModal(true);
-                  toggleSidebar();
-                }}
-              >
-                <Plus className="w-4 h-4 mr-1" /> Categoría
-              </Button>
-
-              <Button
-                onClick={() => {
-                  toggleSidebar();
-                  router.push("/");
-                }}
-                className="text-blue-600 "
-              >
-                <House className="w-4 h-4  mr-1" />
-                Inicio
-              </Button>
-            </div>
-          </div>
-        </div>
+      {showProductModal && (
+        <ProductModal product={editingProduct} onClose={closeProductModal} />
       )}
 
-      {/* STATS */}
-      <div className="max-w-7xl mx-auto pt-6 px-4 sm:px-6">
-        <div className="flex gap-2 sm:grid sm:grid-cols-3 sm:gap-4">
-          {[
-            {
-              label: "Total",
-              value: total,
-              color: "blue",
-              icon: <Package className="w-5 h-5 sm:w-6 sm:h-6" />,
-              bg: "bg-blue-50",
-              border: "border-blue-100",
-              text: "text-blue-600",
-            },
-            {
-              label: "En Stock",
-              value: inStock,
-              color: "green",
-              icon: <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />,
-              bg: "bg-green-50",
-              border: "border-green-100",
-              text: "text-green-600",
-            },
-            {
-              label: "Sin Stock",
-              value: outStock,
-              color: "red",
-              icon: <XCircle className="w-5 h-5 sm:w-6 sm:h-6" />,
-              bg: "bg-red-50",
-              border: "border-red-100",
-              text: "text-red-600",
-            },
-          ].map((stat) => (
-            <Card
-              key={stat.label}
-              className={`flex-1 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 ${stat.bg} ${stat.border} border`}
-            >
-              <CardContent className="flex items-center justify-between gap-2 py-3 px-4 sm:py-5 sm:px-6">
-                <div className="flex flex-col">
-                  <p className="text-xs sm:text-sm text-gray-600 truncate">
-                    {stat.label}
-                  </p>
-                  <p className="text-lg sm:text-2xl font-bold text-gray-900">
-                    {stat.value}
-                  </p>
-                </div>
-                <div className={`${stat.text} flex-shrink-0`}>{stat.icon}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* PRODUCTS TABLE */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <Card className="overflow-x-auto">
-          <CardHeader>
-            <CardTitle>Productos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full table-auto min-w-[600px]">
-                <thead>
-                  <tr className="bg-gray-100">
-                    {["Producto", "Categoría", "Stock", "Acciones"].map(
-                      (head) => (
-                        <th
-                          key={head}
-                          className="text-left px-4 py-2 text-sm font-medium text-gray-700"
-                        >
-                          {head}
-                        </th>
-                      )
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {loading ? (
-                    Array.from({ length: 5 }).map((_, i) => (
-                      <tr key={i} className="animate-pulse">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-gray-200 rounded-lg" />
-                            <div className="h-4 w-24 bg-gray-200 rounded" />
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="h-4 w-16 bg-gray-200 rounded" />
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="h-4 w-12 bg-gray-200 rounded" />
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex space-x-2">
-                            <div className="w-6 h-6 bg-gray-200 rounded-full" />
-                            <div className="w-6 h-6 bg-gray-200 rounded-full" />
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : products.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="text-center py-8 text-gray-500"
-                      >
-                        No hay productos registrados.
-                      </td>
-                    </tr>
-                  ) : (
-                    products.map((p) => (
-                      <tr key={p.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden">
-                            {p.imageUrl ? (
-                              <Image
-                                src={p.imageUrl}
-                                alt={p.name}
-                                className="w-full h-full object-cover"
-                                width={100}
-                                height={100}
-                              />
-                            ) : (
-                              <Package className="w-6 h-6 text-gray-400 m-3" />
-                            )}
-                          </div>
-                          <span className="text-gray-900 font-medium truncate">
-                            {p.name}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <Badge variant="secondary" className="text-xs">
-                            {p.category.name}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={
-                              p.stock ? "text-green-600" : "text-red-600"
-                            }
-                          >
-                            {formatStock(p.stock)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenEditProduct(p)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(p.id)}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* MODALS */}
-      <Modal
-        isOpen={showProductModal}
-        onClose={closeProductModal}
-        title={editingProduct ? "Editar Producto" : "Nuevo Producto"}
-      >
-        <ProductForm
-          product={editingProduct || undefined}
-          onSuccess={closeProductModal}
-        />
-      </Modal>
-      <Modal
-        isOpen={showCategoryModal}
-        onClose={closeCategoryModal}
-        title="Crear Categoría"
-      >
-        <CategoryForm onSuccess={closeCategoryModal} />
-      </Modal>
+      {showCategoryModal && <CategoryModal onClose={closeCategoryModal} />}
     </div>
   );
 }
