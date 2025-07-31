@@ -26,6 +26,7 @@ export default function AdminPage() {
     query,
     suggestions,
     loading: loadingSuggestions,
+    showDropdown,
     onQueryChange,
     selectSuggestion,
   } = useSearchSuggestions(setFilters);
@@ -74,6 +75,7 @@ export default function AdminPage() {
             query={query}
             suggestions={suggestions}
             loading={loadingSuggestions}
+            showDropdown={showDropdown}
             onQueryChange={onQueryChange}
             onSelect={selectSuggestion}
             filters={filters}

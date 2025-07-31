@@ -10,11 +10,13 @@ export function useSearchSuggestions(
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const fetchSuggestions = async (q: string) => {
     if (!q) {
       setSuggestions([]);
       setLoading(false);
+      setShowDropdown(false);
       return;
     }
     try {
@@ -28,12 +30,14 @@ export function useSearchSuggestions(
       setSuggestions([]);
     } finally {
       setLoading(false);
+      setShowDropdown(true);
     }
   };
 
   const onQueryChange = (q: string) => {
     setQuery(q);
     setLoading(true);
+    setShowDropdown(true);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => fetchSuggestions(q), 300);
   };
@@ -41,6 +45,7 @@ export function useSearchSuggestions(
   const selectSuggestion = (name: string) => {
     setQuery(name);
     onFilterChange({ search: name });
+    setShowDropdown(false);
     setSuggestions([]);
   };
 
@@ -48,6 +53,7 @@ export function useSearchSuggestions(
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest(".suggestion-panel")) {
+        setShowDropdown(false);
         setSuggestions([]);
       }
     };
@@ -55,5 +61,12 @@ export function useSearchSuggestions(
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  return { query, suggestions, loading, onQueryChange, selectSuggestion };
+  return {
+    query,
+    suggestions,
+    loading,
+    showDropdown,
+    onQueryChange,
+    selectSuggestion,
+  };
 }
